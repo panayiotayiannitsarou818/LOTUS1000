@@ -10,7 +10,7 @@ import sys
 
 # Imports από τα existing modules
 from step_2_zoiroi_idiaterotites_FIXED_v3_PATCHED import step2_apply_FIXED_v3
-from step_2_finalize import finalize_step2_assignments, validate_final_assignments, lock_step2_results
+from step2_finalize import finalize_step2_assignments, validate_final_assignments, lock_step2_results
 
 
 def load_excel_data(file_path: str, sheet_name: str = None) -> pd.DataFrame:
