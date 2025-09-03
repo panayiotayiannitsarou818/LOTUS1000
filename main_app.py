@@ -52,11 +52,31 @@ def export_to_excel(dataframes_dict: Dict[str, pd.DataFrame], filename: str = "�
     """Εξαγωγή πολλαπλών DataFrames σε Excel με διαφορετικά sheets"""
     output = io.BytesIO()
     
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        for sheet_name, df in dataframes_dict.items():
-            # Περιορισμός μήκους ονόματος sheet στα 31 χαρακτήρες
-            safe_sheet_name = sheet_name[:31] if len(sheet_name) > 31 else sheet_name
-            df.to_excel(writer, sheet_name=safe_sheet_name, index=False)
+    try:
+        # Προσπάθεια με openpyxl
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            for sheet_name, df in dataframes_dict.items():
+                # Περιορισμός μήκους ονόματος sheet στα 31 χαρακτήρες
+                safe_sheet_name = sheet_name[:31] if len(sheet_name) > 31 else sheet_name
+                df.to_excel(writer, sheet_name=safe_sheet_name, index=False)
+    except ImportError:
+        try:
+            # Fallback σε xlsxwriter
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                for sheet_name, df in dataframes_dict.items():
+                    safe_sheet_name = sheet_name[:31] if len(sheet_name) > 31 else sheet_name
+                    df.to_excel(writer, sheet_name=safe_sheet_name, index=False)
+        except ImportError:
+            # Τελευταία λύση - CSV files σε ZIP
+            st.warning("Δεν βρέθηκε Excel engine. Εξαγωγή σε CSV format.")
+            import zipfile
+            output = io.BytesIO()
+            with zipfile.ZipFile(output, 'w') as zip_file:
+                for sheet_name, df in dataframes_dict.items():
+                    csv_buffer = io.StringIO()
+                    df.to_csv(csv_buffer, index=False, encoding='utf-8')
+                    zip_file.writestr(f"{sheet_name}.csv", csv_buffer.getvalue())
+            return output.getvalue()
     
     return output.getvalue()
 
