@@ -75,31 +75,37 @@ def run_step2(df_step1: pd.DataFrame, step1_column: str) -> Optional[pd.DataFram
     """Εκτέλεση Βήματος 2 - Ζωηροί & Ιδιαιτερότητες"""
     try:
         with st.spinner("Εκτέλεση Βήματος 2 (Ζωηροί & Ιδιαιτερότητες)..."):
-            # Χρήση temporary directory για outputs
-            import tempfile
-            with tempfile.TemporaryDirectory() as temp_dir:
-                # Αποθήκευση προσωρινού αρχείου
-                temp_file = Path(temp_dir) / "temp_step1.xlsx"
-                df_step1.to_excel(temp_file, index=False)
-                
-                # Εκτέλεση step2
-                run_step2_with_lock(
-                    input_file=str(temp_file),
-                    step1_column=step1_column,
-                    output_dir=temp_dir,
-                    max_scenarios=5
-                )
-                
-                # Φόρτωση αποτελεσμάτων
-                result_files = list(Path(temp_dir).glob("step2_locked_scenario_*.xlsx"))
-                if result_files:
-                    # Επιλογή πρώτου σεναρίου για απλότητα
-                    df_step2 = pd.read_excel(result_files[0])
-                    st.success(f"Βήμα 2: Επιτυχής ολοκλήρωση με {len(result_files)} σενάρια")
-                    return df_step2
-                else:
-                    st.error("Δεν βρέθηκαν αποτελέσματα από το Βήμα 2")
-                    return None
+            # Κλήση του step2_apply_FIXED_v3 άμεσα
+            scenarios = step2_apply_FIXED_v3(
+                df_step1, 
+                step1_col_name=step1_column,
+                max_results=5
+            )
+            
+            if not scenarios:
+                st.error("Δεν βρέθηκαν σενάρια από το Βήμα 2!")
+                return None
+            
+            # Παίρνουμε το πρώτο σενάριο και το κλειδώνουμε
+            scenario_name, scenario_df, metrics = scenarios[0]
+            
+            st.success(f"Βήμα 2: Βρέθηκαν {len(scenarios)} σενάρια")
+            st.info(f"Επιλέχθηκε {scenario_name} - Παιδαγωγικές συγκρούσεις: {metrics['ped_conflicts']}, Σπασμένες φιλίες: {metrics['broken']}")
+            
+            # Εύρεση της στήλης βήματος 2
+            step2_cols = [col for col in scenario_df.columns if col.startswith('ΒΗΜΑ2_')]
+            if not step2_cols:
+                st.error("Δεν βρέθηκε στήλη ΒΗΜΑ2_ στο σενάριο")
+                return None
+            
+            step2_col = step2_cols[0]
+            
+            # Κλείδωμα αποτελεσμάτων
+            final_df, lock_stats = finalize_step2_assignments(scenario_df, step2_col)
+            
+            st.info(f"Κλειδώθηκαν {lock_stats['newly_placed']} επιπλέον παιδιά")
+            
+            return final_df
                     
     except Exception as e:
         st.error(f"Σφάλμα στο Βήμα 2: {e}")
