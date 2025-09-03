@@ -101,13 +101,10 @@ def _compute_targets_global(
     z = str(r.get("ΖΩΗΡΟΣ", "")).strip() == "Ν"
     i = str(r.get("ΙΔΙΑΙΤΕΡΟΤΗΤΑ", "")).strip() == "Ν"
     if not pd.isna(cl):
-        cl_str = str(cl)
-        # Εξασφάλιση ότι το key υπάρχει
-        if cl_str not in Z_step1:
-            Z_step1[cl_str] = 0
-        if cl_str not in I_step1:
-            I_step1[cl_str] = 0
-            
+        cl_str = str(cl).strip()
+        # Αγνόηση κενών ή άκυρων class labels
+        if not cl_str or cl_str not in class_labels:
+            continue
         if z:
             Z_step1[cl_str] += 1
             Z_total_step1 += 1
