@@ -95,6 +95,10 @@ def run_step2(df_step1: pd.DataFrame, step1_column: str) -> Optional[pd.DataFram
     """Εκτέλεση Βήματος 2 - Ζωηροί & Ιδιαιτερότητες"""
     try:
         with st.spinner("Εκτέλεση Βήματος 2 (Ζωηροί & Ιδιαιτερότητες)..."):
+            # Debug info
+            st.write(f"DEBUG: Χρησιμοποιώντας στήλη: {step1_column}")
+            st.write(f"DEBUG: Μέγεθος DataFrame: {len(df_step1)} σειρές")
+            
             # Εισαγωγή της συνάρτησης με το σωστό όνομα
             from step_2_zoiroi_idiaterotites_FIXED_v3_PATCHED import step2_apply_FIXED_v3
             
@@ -105,34 +109,45 @@ def run_step2(df_step1: pd.DataFrame, step1_column: str) -> Optional[pd.DataFram
                 max_results=5
             )
             
+            st.write(f"DEBUG: Αποτέλεσμα scenarios: {scenarios}")
+            
             if not scenarios:
                 st.error("Δεν βρέθηκαν σενάρια από το Βήμα 2!")
+                st.write("DEBUG: Η λίστα scenarios είναι κενή")
                 return None
             
             # Παίρνουμε το πρώτο σενάριο και το κλειδώνουμε
             scenario_name, scenario_df, metrics = scenarios[0]
             
             st.success(f"Βήμα 2: Βρέθηκαν {len(scenarios)} σενάρια")
-            st.info(f"Επιλέχθηκε {scenario_name} - Παιδαγωγικές συγκρούσεις: {metrics['ped_conflicts']}, Σπασμένες φιλίες: {metrics['broken']}")
+            st.info(f"Επιλέχθηκε {scenario_name} - Παιδαγωγικές συγκρούσεις: {metrics.get('ped_conflicts', 'N/A')}, Σπασμένες φιλίες: {metrics.get('broken', 'N/A')}")
+            
+            # Debug στήλες
+            st.write(f"DEBUG: Στήλες scenario_df: {list(scenario_df.columns)}")
             
             # Εύρεση της στήλης βήματος 2
             step2_cols = [col for col in scenario_df.columns if col.startswith('ΒΗΜΑ2_')]
+            st.write(f"DEBUG: Στήλες ΒΗΜΑ2_: {step2_cols}")
+            
             if not step2_cols:
                 st.error("Δεν βρέθηκε στήλη ΒΗΜΑ2_ στο σενάριο")
                 return None
             
             step2_col = step2_cols[0]
+            st.write(f"DEBUG: Χρησιμοποιώντας στήλη: {step2_col}")
             
             # Κλείδωμα αποτελεσμάτων
             final_df, lock_stats = finalize_step2_assignments(scenario_df, step2_col)
             
-            st.info(f"Κλειδώθηκαν {lock_stats['newly_placed']} επιπλέον παιδιά")
+            st.info(f"Κλειδώθηκαν {lock_stats.get('newly_placed', 0)} επιπλέον παιδιά")
+            st.write(f"DEBUG: Lock stats: {lock_stats}")
             
             return final_df
                     
     except Exception as e:
-        st.error(f"Σφάλμα στο Βήμα 2: {e}")
-        st.error(f"Λεπτομέρειες: {str(e)}")
+        import traceback
+        st.error(f"Σφάλμα στο Βήμα 2: {str(e)}")
+        st.error(f"Λεπτομέρειες: {traceback.format_exc()}")
         return None
 
 def run_step4(df_step3: pd.DataFrame, assigned_column: str = 'ΒΗΜΑ3_ΣΕΝΑΡΙΟ_1') -> Optional[pd.DataFrame]:
