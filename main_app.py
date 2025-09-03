@@ -498,7 +498,10 @@ def run_step6(df_step5: pd.DataFrame) -> Optional[Dict]:
             progress_bar.progress(100)
             status_text.text("✅ Βήμα 6 ολοκληρώθηκε επιτυχώς!")
             
-            st.success(f"Βήμα 6: {result['summary']['status']} σε {result['summary']['iterations']} επαναλήψεις")
+            summary = result.get('summary', {})
+            status = summary.get('status', 'Completed')
+            iterations = summary.get('iterations', 0)
+            st.success(f"Βήμα 6: {status} σε {iterations} επαναλήψεις")
             return result
         else:
             st.error("Δεν βρέθηκαν αποτελέσματα από το Βήμα 6")
