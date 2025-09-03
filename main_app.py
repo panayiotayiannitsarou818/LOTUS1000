@@ -308,8 +308,11 @@ def main():
                                 st.session_state.dataframes['ΒΗΜΑ2_ΑΠΟΤΕΛΕΣΜΑΤΑ'] = df_step2
                 
                 with col3:
-                    if st.button("3️⃣ Βήμα 3"):
-                        st.info("Βήμα 3 θα προστεθεί σύντομα")
+                    if st.button("3️⃣ Βήμα 3") and 'ΒΗΜΑ2_ΑΠΟΤΕΛΕΣΜΑΤΑ' in st.session_state.dataframes:
+                        df_step2 = st.session_state.dataframes['ΒΗΜΑ2_ΑΠΟΤΕΛΕΣΜΑΤΑ']
+                        df_step3 = run_step3(df_step2, num_classes)
+                        if df_step3 is not None:
+                            st.session_state.dataframes['ΒΗΜΑ3_ΑΠΟΤΕΛΕΣΜΑΤΑ'] = df_step3
     
     # Εμφάνιση αποτελεσμάτων
     if 'dataframes' in st.session_state and st.session_state.dataframes:
