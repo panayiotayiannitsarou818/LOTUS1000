@@ -159,7 +159,7 @@ def get_opposite_category(category: str) -> str:
     return opposites.get(category, category)
 
 def count_groups_by_category_per_class_strict(df: pd.DataFrame, assigned_column: str, classes: List[str], 
-                                             step1_results: None,
+                                             step1_results: Optional[Any] = None,
                                              detected_pairs: Optional[List[Tuple[str, str]]] = None) -> Dict[str, Dict[str, int]]:
     """
     ΒΕΛΤΙΩΜΕΝΗ καταμέτρηση ομάδων που λαμβάνει υπόψη την ΠΡΑΓΜΑΤΙΚΗ δομή από τα προηγούμενα βήματα.

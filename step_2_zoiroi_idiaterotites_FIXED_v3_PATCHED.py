@@ -97,20 +97,16 @@ def _compute_targets_global(
     Z_total_step1 = 0
     I_total_step1 = 0
     for _, r in df.iterrows():
-    cl = r.get(step1_col)
-    z = str(r.get("ΖΩΗΡΟΣ", "")).strip() == "Ν"
-    i = str(r.get("ΙΔΙΑΙΤΕΡΟΤΗΤΑ", "")).strip() == "Ν"
-    if not pd.isna(cl):
-        cl_str = str(cl).strip()
-        # Αγνόηση κενών ή άκυρων class labels
-        if not cl_str or cl_str not in class_labels:
-            continue
-        if z:
-            Z_step1[cl_str] += 1
-            Z_total_step1 += 1
-        if i:
-            I_step1[cl_str] += 1
-            I_total_step1 += 1
+        cl = r.get(step1_col)
+        z = str(r.get("ΖΩΗΡΟΣ", "")).strip() == "Ν"
+        i = str(r.get("ΙΔΙΑΙΤΕΡΟΤΗΤΑ", "")).strip() == "Ν"
+        if not pd.isna(cl):
+            if z:
+                Z_step1[str(cl)] += 1
+                Z_total_step1 += 1
+            if i:
+                I_step1[str(cl)] += 1
+                I_total_step1 += 1
 
     to_place = df[pd.isna(df[step1_col])]
     Z_to_place = int((to_place["ΖΩΗΡΟΣ"].astype(str).str.strip() == "Ν").sum())

@@ -255,13 +255,15 @@ def main():
                                 st.session_state.dataframes['ΒΗΜΑ2_ΑΠΟΤΕΛΕΣΜΑΤΑ'] = df_step2
                                 
                                 # Βήματα 3 (προς το παρόν χρησιμοποιούμε το ίδιο DataFrame)
-                                df_step3 = df_step2  # Placeholder
+                                df_step3 = df_step2.copy()  # Placeholder - ΒΗΜΑ3 προς υλοποίηση
                                 st.session_state.dataframes['ΒΗΜΑ3_ΑΠΟΤΕΛΕΣΜΑΤΑ'] = df_step3
                                 
-                                # Βήμα 4
-                                step2_columns = [col for col in df_step3.columns if col.startswith('ΒΗΜΑ2_ΣΕΝΑΡΙΟ_')]
-                                if step2_columns:
-                                    df_step4 = run_step4(df_step3, step2_columns[0])
+                                # Βήμα 4 - ΔΙΟΡΘΩΣΗ: Χρήση σωστής στήλης
+                                step3_columns = [col for col in df_step3.columns if col.startswith('ΒΗΜΑ2_ΣΕΝΑΡΙΟ_')]
+                                if not step3_columns:
+                                    step3_columns = [col for col in df_step3.columns if col.startswith('ΒΗΜΑ1_ΣΕΝΑΡΙΟ_')]
+                                if step3_columns:
+                                    df_step4 = run_step4(df_step3, step3_columns[0])
                                     if df_step4 is not None:
                                         st.session_state.dataframes['ΒΗΜΑ4_ΑΠΟΤΕΛΕΣΜΑΤΑ'] = df_step4
                                         
@@ -275,7 +277,8 @@ def main():
                                                 # Βήμα 6
                                                 step6_result = run_step6(df_step5)
                                                 if step6_result is not None:
-                                                    df_step6 = step6_result['df']
+                                                    # ΔΙΟΡΘΩΣΗ: Σωστή πρόσβαση στο DataFrame
+                                                    df_step6 = step6_result["ΣΕΝΑΡΙΟ_1"]['df']
                                                     st.session_state.dataframes['ΒΗΜΑ6_ΑΠΟΤΕΛΕΣΜΑΤΑ'] = df_step6
                                                     
                                                     # Βήμα 7
