@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Ολοκληρωμένη εφαρμογή Streamlit για την εκτέλεση των βημάτων κατανομής μαθητών
+Διορθωμένη εφαρμογή Streamlit για την κατανομή μαθητών σε τμήματα
 Ενσωματώνει όλα τα βήματα 1-7 με πλήρη λειτουργικότητα
-Διορθωμένη έκδοση με σωστή χρήση των modules
 """
 import streamlit as st
 import pandas as pd
@@ -204,8 +203,8 @@ def display_basic_info(df: pd.DataFrame, debug_mode: bool = False):
     if debug_mode:
         st.write(f"**DEBUG - Αναλυτικά:**")
         if 'ΦΥΛΟ' in df.columns:
-            st.write(f"ΦΥΛΟ: Α={boys_count}, Κ={girls_count}")
-            st.write(f"ΦΥΛΟ unique values: {df['ΦΥΛΟ'].unique()}")
+            st.write(f"Φύλο: Α={boys_count}, Κ={girls_count}")
+            st.write(f"Φύλο unique values: {df['ΦΥΛΟ'].unique()}")
         if 'ΠΑΙΔΙ_ΕΚΠΑΙΔΕΥΤΙΚΟΥ' in df.columns:
             teachers_list = df[df['ΠΑΙΔΙ_ΕΚΠΑΙΔΕΥΤΙΚΟΥ'] == 'Ν']['ΟΝΟΜΑ'].tolist() if 'ΟΝΟΜΑ' in df.columns else []
             st.write(f"Παιδιά εκπαιδευτικών: {teachers_count}")
@@ -365,7 +364,7 @@ def run_step3(df_step2: pd.DataFrame, num_classes: Optional[int] = None) -> Opti
         return None
         
     try:
-        st.subheader("👫 Βήμα 3: Αμοιβαίες Φιλίες")
+        st.subheader("💫 Βήμα 3: Αμοιβαίες Φιλίες")
         
         progress_bar = st.progress(0)
         status_text = st.empty()
@@ -434,7 +433,7 @@ def run_step5(df_step4: pd.DataFrame, scenario_col: str) -> Tuple[Optional[pd.Da
         return None, None
         
     try:
-        st.subheader("🏁 Βήμα 5: Υπόλοιποι Μαθητές")
+        st.subheader("🔄 Βήμα 5: Υπόλοιποι Μαθητές")
         
         progress_bar = st.progress(0)
         status_text = st.empty()
@@ -560,7 +559,7 @@ def create_detailed_steps_workbook():
         
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             # Ταξινόμηση των βημάτων για σωστή σειρά
-            step_order = ['ΒΗΜΑ1', 'ΒΗΜΑ2', 'ΒΗΜΑ3', 'ΒΗΜΑ4', 'ΒΗΜΑ5', 'ΒΗΜΑ6']
+            step_order = ['ΒΗΜΑ1', 'ΒΗΜΑ2', 'ΒΗΜΑ3', 'ΒΗΜΑ4', 'ΒΗΜΑ5', 'ΒΗΜΑ6', 'ΒΗΜΑ7']
             
             sheets_written = 0
             
@@ -711,7 +710,7 @@ def main():
             
             if run_all_steps:
                 # Αυτόματη εκτέλεση όλων των βημάτων
-                if st.button("▶️ Εκτέλεση Όλων των Βημάτων", type="primary"):
+                if st.button("▶️ Εκτέλεση όλων των Βημάτων", type="primary"):
                     st.session_state.processing_status = 'running'
                     
                     try:
@@ -858,16 +857,17 @@ def main():
         # Tabs για κάθε βήμα
         available_steps = list(st.session_state.results.keys())
         if available_steps:
-            tabs = st.tabs([f"Βήμα {i+1}" for i in range(len(available_steps))])
+            tabs = st.tabs([f"Βήμα {i+1}" for i in range(min(len(available_steps), 7))])
             
-            for i, step_name in enumerate(available_steps):
-                with tabs[i]:
-                    step_data = st.session_state.results[step_name]
-                    if isinstance(step_data, dict) and 'df' in step_data:
-                        df_step = step_data['df']
-                        st.subheader(f"📋 {step_name.upper()}")
-                        st.dataframe(df_step, use_container_width=True)
-                        st.info(f"Σύνολο: {len(df_step)} εγγραφές, Στήλες: {len(df_step.columns)}")
+            for i, step_name in enumerate(available_steps[:7]):
+                if i < len(tabs):
+                    with tabs[i]:
+                        step_data = st.session_state.results[step_name]
+                        if isinstance(step_data, dict) and 'df' in step_data:
+                            df_step = step_data['df']
+                            st.subheader(f"📋 {step_name.upper()}")
+                            st.dataframe(df_step, use_container_width=True)
+                            st.info(f"Σύνολο: {len(df_step)} εγγραφές, Στήλες: {len(df_step.columns)}")
         
         # Τελικά στατιστικά
         if 'final_df' in st.session_state.results:
@@ -883,6 +883,8 @@ def main():
             
             if final_col:
                 display_scenario_statistics(final_df, final_col, "Τελικό Αποτέλεσμα")
+            else:
+                st.warning("Δεν βρέθηκε τελική στήλη τμήματος για στατιστικά")
         
         # Κουμπί εξαγωγής
         st.markdown("---")
