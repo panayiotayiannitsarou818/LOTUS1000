@@ -95,6 +95,9 @@ def run_step2(df_step1: pd.DataFrame, step1_column: str) -> Optional[pd.DataFram
     """Εκτέλεση Βήματος 2 - Ζωηροί & Ιδιαιτερότητες"""
     try:
         with st.spinner("Εκτέλεση Βήματος 2 (Ζωηροί & Ιδιαιτερότητες)..."):
+            # Εισαγωγή της συνάρτησης με το σωστό όνομα
+            from step_2_zoiroi_idiaterotites_FIXED_v3_PATCHED import step2_apply_FIXED_v3
+            
             # Κλήση του step2_apply_FIXED_v3 άμεσα
             scenarios = step2_apply_FIXED_v3(
                 df_step1, 
@@ -129,6 +132,7 @@ def run_step2(df_step1: pd.DataFrame, step1_column: str) -> Optional[pd.DataFram
                     
     except Exception as e:
         st.error(f"Σφάλμα στο Βήμα 2: {e}")
+        st.error(f"Λεπτομέρειες: {str(e)}")
         return None
 
 def run_step4(df_step3: pd.DataFrame, assigned_column: str = 'ΒΗΜΑ3_ΣΕΝΑΡΙΟ_1') -> Optional[pd.DataFrame]:
